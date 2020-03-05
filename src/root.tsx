@@ -5,18 +5,21 @@ import { ThemeProvider } from 'styled-components';
 import { CssBaseline, MuiThemeProvider } from '@material-ui/core';
 import { GlobalStyle } from './styles/global';
 import { theme } from './styles/theme';
+import { AuthProvider } from './contexts/auth';
 import App from './app';
 
 function Root() {
   return (
     <MuiThemeProvider theme={theme}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <GlobalStyle />
+        <AuthProvider>
+          <CssBaseline />
+          <GlobalStyle />
 
-        <BrowserRouter>
-          <Route component={App} />
-        </BrowserRouter>
+          <BrowserRouter>
+            <Route component={App} />
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </MuiThemeProvider>
   );
