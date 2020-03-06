@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, Suspense } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -9,11 +9,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Drawer from '@material-ui/core/Drawer';
 
-import { Grid, Hidden } from '@material-ui/core';
+import { Grid, Hidden, CircularProgress } from '@material-ui/core';
 import { useStyles } from './styles';
 import { AuthContext } from '../../contexts/auth';
 import routes from './routes';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { ReactComponent as Logo } from '../../assets/images/cards.svg';
 import SideBar from './components/sidebar';
 
@@ -98,9 +98,17 @@ function MainLayout() {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        {filteredRoutes.map(route => (
-          <Route key={route.path} path={route.path} />
-        ))}
+        <Suspense fallback={<CircularProgress />}>
+          <Switch>
+            {filteredRoutes.map(route => (
+              <Route
+                key={route.path}
+                path={route.path}
+                component={route.component}
+              />
+            ))}
+          </Switch>
+        </Suspense>
       </main>
     </div>
   );
