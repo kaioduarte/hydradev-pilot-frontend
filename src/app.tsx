@@ -17,7 +17,7 @@ function App() {
     return <Redirect to={COLLECTIONS} />;
   }
 
-  if (!isUserLoggedIn && location.pathname !== LOGIN) {
+  if (!isUserLoggedIn) {
     return <Redirect to={LOGIN} />;
   }
 
