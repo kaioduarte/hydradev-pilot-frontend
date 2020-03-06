@@ -1,16 +1,17 @@
-import { api } from './index';
-import { ResponseChain } from 'wretch';
-
-async function jsonResponse(
-  response: ResponseChain & Promise<any>,
-): Promise<any> {
-  return response.json().catch(e => JSON.parse(e.message || {}));
-}
-
-function me() {
-  return jsonResponse(api.url('/users/me').get());
-}
+import { api, jsonResponse } from './index';
+import { ICreateUserDto } from '../interfaces/dto/create-user.dto';
 
 export default {
-  me,
+  me() {
+    return jsonResponse(api.url('/users/me').get());
+  },
+  getAll() {
+    return jsonResponse(api.url('/users').get());
+  },
+  patch(_id: string, input: Partial<ICreateUserDto>) {
+    return jsonResponse(api.url(`/users/${_id}`).patch(input));
+  },
+  delete(_id: string) {
+    return jsonResponse(api.url(`/users/${_id}`).delete());
+  },
 };
