@@ -1,8 +1,9 @@
-import React, { Suspense, lazy, useContext } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Switch, Route, Redirect, useLocation } from 'react-router-dom';
 import { LinearProgress } from '@material-ui/core';
-import { AuthContext } from './contexts/auth';
-import { LOGIN, COLLECTIONS } from './routes';
+import { LOGIN, COLLECTIONS, REGISTER } from './routes';
+import { isLoggedIn } from './utils/auth';
+import ProtectedRoute from './components/protected-route';
 
 const MainLayout = lazy(() => import('./layouts/main'));
 const LoginPage = lazy(() => import('./pages/login'));
@@ -10,15 +11,12 @@ const RegisterPage = lazy(() => import('./pages/register'));
 
 function App() {
   const location = useLocation();
-  const { userInfo } = useContext(AuthContext);
-  const { isUserLoggedIn } = userInfo;
 
-  if (isUserLoggedIn && location.pathname === LOGIN) {
+  if (
+    isLoggedIn() &&
+    (location.pathname === LOGIN || location.pathname === REGISTER)
+  ) {
     return <Redirect to={COLLECTIONS} />;
-  }
-
-  if (!isUserLoggedIn) {
-    return <Redirect to={LOGIN} />;
   }
 
   return (
@@ -26,7 +24,7 @@ function App() {
       <Switch>
         <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} />
-        <Route component={MainLayout} />
+        <ProtectedRoute component={MainLayout} />
       </Switch>
     </Suspense>
   );

@@ -1,73 +1,39 @@
-import React, { useContext, useCallback, useState } from 'react';
-import { AuthContext } from '../../contexts/auth';
-import { ReactComponent as Logo } from '../../assets/images/cards.svg';
-import { Link as RouterLink } from 'react-router-dom';
-import {
-  Grid,
-  TextField,
-  Container,
-  Typography,
-  Button,
-  makeStyles,
-  Link,
-  Box,
-} from '@material-ui/core';
-import authApi from '../../api/auth';
+import React, { useState } from 'react';
+import { Link as RouterLink, useHistory } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
 
-const useStyles = makeStyles(theme => ({
-  main: {
-    margin: 'auto',
-  },
-  paper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
+// MUI components
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Container from '@material-ui/core/Container';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import Link from '@material-ui/core/Link';
+import Box from '@material-ui/core/Box';
+
+import authApi from '../../api/auth';
+import { saveToken } from '../../utils/auth';
+import { useStyles } from './styles';
+import { ReactComponent as Logo } from '../../assets/images/cards.svg';
 
 function RegisterPage() {
-  const { setSuccessfulData } = useContext(AuthContext);
-  const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    password: '',
-  });
+  const classes = useStyles();
+  const history = useHistory();
+  const { control, handleSubmit } = useForm();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = useCallback(
-    async e => {
-      e.preventDefault();
+  async function submitForm(data: any, e: any) {
+    e.preventDefault();
+    const response = await authApi.signUp(data);
 
-      const [error, response] = await authApi.signUp(formData);
+    if (response.status !== 'success') {
+      setErrorMessage(response.data.message);
+      return;
+    }
 
-      if (error) {
-        setErrorMessage(error.data.message);
-        return;
-      }
-
-      setSuccessfulData(response);
-    },
-    [formData, setSuccessfulData],
-  );
-
-  function handleChangeField(e: any) {
-    const { name, value } = e.target;
-
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+    saveToken(response.data.token);
+    history.replace('/');
   }
-
-  const classes = useStyles();
 
   return (
     <Container className={classes.main} component="main" maxWidth="xs">
@@ -78,45 +44,54 @@ function RegisterPage() {
         <Typography component="h1" variant="h5">
           Register
         </Typography>
-        <form className={classes.form} noValidate onSubmit={handleSubmit}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Name"
+        <form
+          className={classes.form}
+          noValidate
+          onSubmit={handleSubmit(submitForm)}
+        >
+          <Controller
+            as={
+              <TextField
+                autoFocus
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                label="Name"
+                autoComplete="name"
+              />
+            }
             name="name"
-            autoComplete="name"
-            autoFocus
-            onChange={handleChangeField}
-            value={formData.name}
+            control={control}
           />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="username"
-            label="Username"
+          <Controller
+            as={
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                label="Username"
+                autoComplete="username"
+              />
+            }
             name="username"
-            autoComplete="username"
-            autoFocus
-            onChange={handleChangeField}
-            value={formData.username}
+            control={control}
           />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
+          <Controller
+            as={
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+              />
+            }
             name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            onChange={handleChangeField}
-            value={formData.password}
+            control={control}
           />
           <Typography align="center" component="small" color="error">
             {errorMessage}

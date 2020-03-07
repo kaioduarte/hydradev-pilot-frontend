@@ -1,69 +1,39 @@
-import React, { useContext, useCallback, useState } from 'react';
-import { AuthContext } from '../../contexts/auth';
-import { ReactComponent as Logo } from '../../assets/images/cards.svg';
-import { Link as RouterLink } from 'react-router-dom';
-import {
-  Grid,
-  TextField,
-  Container,
-  Typography,
-  Button,
-  makeStyles,
-  Link,
-  Box,
-} from '@material-ui/core';
-import authApi from '../../api/auth';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Link as RouterLink, useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles(theme => ({
-  main: {
-    margin: 'auto',
-  },
-  paper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
+// MUI components
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Container from '@material-ui/core/Container';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import Link from '@material-ui/core/Link';
+import Box from '@material-ui/core/Box';
+
+import authApi from '../../api/auth';
+import { saveToken } from '../../utils/auth';
+import { useStyles } from './styles';
+import { ReactComponent as Logo } from '../../assets/images/cards.svg';
 
 function LoginPage() {
-  const { setSuccessfulData } = useContext(AuthContext);
-  const [formData, setFormData] = useState({ username: '', password: '' });
+  const classes = useStyles();
+  const history = useHistory();
+  const { control, handleSubmit } = useForm();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = useCallback(
-    async e => {
-      e.preventDefault();
-      const response = await authApi.signIn(formData);
+  async function submitForm(data: any, e: any) {
+    e.preventDefault();
+    const response = await authApi.signIn(data);
 
-      if (response.status !== 'success') {
-        console.log(response);
-        setErrorMessage(response.data.message);
-        return;
-      }
+    if (response.status !== 'success') {
+      setErrorMessage(response.data.message);
+      return;
+    }
 
-      setSuccessfulData(response);
-    },
-    [formData, setSuccessfulData],
-  );
-
-  function handleChangeField(e: any) {
-    const { name, value } = e.target;
-
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+    saveToken(response.data.token);
+    history.replace('/');
   }
-
-  const classes = useStyles();
 
   return (
     <Container className={classes.main} component="main" maxWidth="xs">
@@ -74,32 +44,40 @@ function LoginPage() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} noValidate onSubmit={handleSubmit}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="username"
-            label="Username"
+        <form
+          className={classes.form}
+          noValidate
+          onSubmit={handleSubmit(submitForm)}
+        >
+          <Controller
+            as={
+              <TextField
+                autoFocus
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                label="Username"
+                autoComplete="username"
+              />
+            }
             name="username"
-            autoComplete="username"
-            autoFocus
-            onChange={handleChangeField}
-            value={formData.username}
+            control={control}
           />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
+          <Controller
+            as={
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+              />
+            }
             name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            onChange={handleChangeField}
-            value={formData.password}
+            control={control}
           />
           <Typography component="small" color="error">
             {errorMessage}
