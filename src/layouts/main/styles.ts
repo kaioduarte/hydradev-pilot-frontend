@@ -9,6 +9,9 @@ export const useStyles = makeStyles(theme => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
   },
+  logo: {
+    marginRight: theme.spacing(1),
+  },
   drawer: {
     width: drawerWidth,
     flexShrink: 0,

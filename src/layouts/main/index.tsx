@@ -1,39 +1,50 @@
-import React, { useContext, useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 // TODO: try to install again @material-ui/icons
-import { MdAccountCircle as AccountCircle } from 'react-icons/md';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
+import { MdExitToApp as ExitToAppIcon } from 'react-icons/md';
 import Drawer from '@material-ui/core/Drawer';
 
 import { Grid, Hidden, CircularProgress } from '@material-ui/core';
 import { useStyles } from './styles';
-import { AuthContext } from '../../contexts/auth';
 import routes from './routes';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useHistory } from 'react-router-dom';
 import { ReactComponent as Logo } from '../../assets/images/cards.svg';
 import SideBar from './components/sidebar';
+import usersApi from '../../api/users';
+import { removeToken, getUserInfoFromToken } from '../../utils/auth';
 
 function MainLayout() {
   const classes = useStyles();
-  const {
-    userInfo: { user },
-    logout,
-  } = useContext(AuthContext);
+  const history = useHistory();
+  const [user, setUser] = useState(getUserInfoFromToken());
   const [filteredRoutes, setFilteredRoutes] = useState(routes);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
 
-  const handleMenu = (event: any) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
+  function logout() {
+    removeToken();
+    history.replace('/login');
+  }
+
+  useEffect(() => {
+    async function getUserInfo() {
+      const response = await usersApi.me();
+
+      if (response.status !== 'success') {
+        return;
+      }
+
+      setUser(response.data.user);
+    }
+
+    getUserInfo();
+  }, []);
 
   useEffect(() => {
     setFilteredRoutes(
       routes.filter(
-        ({ onlyAdmin }) => !onlyAdmin || (onlyAdmin && user.role === 'admin'),
+        ({ onlyAdmin }) => !onlyAdmin || (onlyAdmin && user?.role === 'admin'),
       ),
     );
   }, [user]);
@@ -42,47 +53,25 @@ function MainLayout() {
     <div className={classes.root}>
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar classes={{ root: classes.toolbarRoot }}>
+          <Logo width={40} height={40} className={classes.logo} />
           <Hidden smDown>
             <Typography variant="h6" className={classes.title}>
               Magic The Gathering
             </Typography>
           </Hidden>
-          <Hidden mdUp>
-            <Logo width={40} height={40} />
-          </Hidden>
           <div>
             <Grid container item alignItems="center">
               <Typography variant="body2" className={classes.title}>
-                Hi, {user.name.split(' ')[0]}
+                Hi, {user?.name.split(' ')[0]}
               </Typography>
               <IconButton
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
                 color="inherit"
+                aria-label="log out from app"
+                onClick={logout}
               >
-                <AccountCircle />
+                <ExitToAppIcon />
               </IconButton>
             </Grid>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={open}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={logout}>Logout</MenuItem>
-            </Menu>
           </div>
         </Toolbar>
       </AppBar>
