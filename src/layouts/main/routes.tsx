@@ -12,6 +12,7 @@ export default [
     icon: ViewModuleIcon,
     component: lazy(() => import('../../pages/cards')),
     onlyAdmin: false,
+    exact: true,
   },
   {
     path: '/collections',
@@ -19,6 +20,7 @@ export default [
     icon: BookmarkIcon,
     component: lazy(() => import('../../pages/collections')),
     onlyAdmin: false,
+    exact: true,
   },
   {
     path: '/users',
@@ -26,5 +28,6 @@ export default [
     icon: GroupIcon,
     component: lazy(() => import('../../pages/users')),
     onlyAdmin: true,
+    exact: true,
   },
 ];

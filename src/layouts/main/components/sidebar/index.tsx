@@ -9,10 +9,10 @@ import { useStyles } from './styles';
 type Props = {
   routes: {
     path: string;
-    name: string;
-    icon: any;
+    name?: string;
+    icon?: any;
     component: ReactNode;
-    onlyAdmin: boolean;
+    onlyAdmin?: boolean;
     exact?: boolean;
   }[];
 };
@@ -22,24 +22,28 @@ function SideBar({ routes }: Props) {
 
   return (
     <List>
-      {routes.map(route => (
-        <ListItem
-          key={route.path}
-          activeClassName={classes.itemActiveItem}
-          button
-          className={classes.listItem}
-          component={NavLink}
-          to={route.path}
-        >
-          <ListItemIcon className={classes.listItemIcon}>
-            <route.icon />
-          </ListItemIcon>
-          <ListItemText
-            classes={{ primary: classes.listItemText }}
-            primary={route.name}
-          />
-        </ListItem>
-      ))}
+      {routes.map(
+        route =>
+          route.name && (
+            <ListItem
+              key={route.path}
+              activeClassName={classes.itemActiveItem}
+              button
+              className={classes.listItem}
+              component={NavLink}
+              to={route.path}
+              exact={route.exact}
+            >
+              <ListItemIcon className={classes.listItemIcon}>
+                <route.icon />
+              </ListItemIcon>
+              <ListItemText
+                classes={{ primary: classes.listItemText }}
+                primary={route.name}
+              />
+            </ListItem>
+          ),
+      )}
     </List>
   );
 }
