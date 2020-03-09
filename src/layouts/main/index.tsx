@@ -100,6 +100,7 @@ function MainLayout() {
                 key={route.path}
                 path={route.path}
                 component={route.component}
+                exact={route.exact}
               />
             ))}
           </Switch>
