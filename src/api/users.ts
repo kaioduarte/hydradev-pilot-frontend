@@ -1,9 +1,10 @@
 import { api, jsonResponse, rawResponse } from './index';
 import { ICreateUserDto } from '../interfaces/dto/create-user.dto';
+import { getUserInfoFromToken } from '../utils/auth';
 
 export default {
   me() {
-    return jsonResponse(api.url('/users/me').get());
+    return jsonResponse(api.url(`/users/${getUserInfoFromToken()?._id}`).get());
   },
   create(input: ICreateUserDto) {
     return jsonResponse(api.url('/users').post(input));
