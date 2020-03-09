@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { parseISO, formatDistanceToNow } from 'date-fns';
-import {
-  MdVpnKey as KeyIcon,
-  MdAdd as AddIcon,
-  MdPersonAdd as PersonAddIcon,
-  MdSearch as SearchIcon,
-  MdDelete as DeleteIcon,
-  MdEdit as EditIcon,
-  MdStar as StarIcon,
-  MdStarBorder as StarBorderIcon,
-} from 'react-icons/md';
 import { useConfirm } from 'material-ui-confirm';
 // MUI components
 import Button from '@material-ui/core/Button';
@@ -28,6 +18,16 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
+
+// MUI icons
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import KeyIcon from '@material-ui/icons/VpnKey';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import SearchIcon from '@material-ui/icons/Search';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import StarIcon from '@material-ui/icons/Star';
 
 import { useStyles } from './styles';
 import usersApi from '../../api/users';
@@ -265,7 +265,7 @@ function UsersPage() {
           aria-label="add"
           onClick={openDialog('create')}
         >
-          <AddIcon size={16} />
+          <AddIcon />
         </Fab>
       </Hidden>
     </>

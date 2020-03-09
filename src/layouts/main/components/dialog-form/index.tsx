@@ -8,7 +8,8 @@ import Typography from '@material-ui/core/Typography';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import useTheme from '@material-ui/core/styles/useTheme';
 
-import { MdClose as CloseIcon } from 'react-icons/md';
+// MUI icons
+import CloseIcon from '@material-ui/icons/Close';
 
 import { useStyles } from './styles';
 

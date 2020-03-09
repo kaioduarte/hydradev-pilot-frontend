@@ -1,20 +1,26 @@
 import React, { useEffect, useState, Suspense } from 'react';
+import { Route, Switch, useHistory } from 'react-router-dom';
+
+// MUI components
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-// TODO: try to install again @material-ui/icons
-import { MdExitToApp as ExitToAppIcon } from 'react-icons/md';
 import Drawer from '@material-ui/core/Drawer';
+import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { Grid, Hidden, CircularProgress } from '@material-ui/core';
-import { useStyles } from './styles';
-import routes from './routes';
-import { Route, Switch, useHistory } from 'react-router-dom';
+// MUI icons
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
 import { ReactComponent as Logo } from '../../assets/images/cards.svg';
 import SideBar from './components/sidebar';
 import usersApi from '../../api/users';
 import { removeToken, getUserInfoFromToken } from '../../utils/auth';
+
+import routes from './routes';
+import { useStyles } from './styles';
 
 function MainLayout() {
   const classes = useStyles();
