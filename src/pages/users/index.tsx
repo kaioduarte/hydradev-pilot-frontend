@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { parseISO, formatDistanceToNow } from 'date-fns';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
 // MUI components
 import Button from '@material-ui/core/Button';
@@ -7,27 +6,13 @@ import Fab from '@material-ui/core/Fab';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import Paper from '@material-ui/core/Paper';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Tooltip from '@material-ui/core/Tooltip';
 
 // MUI icons
 import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import KeyIcon from '@material-ui/icons/VpnKey';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import SearchIcon from '@material-ui/icons/Search';
-import StarBorderIcon from '@material-ui/icons/StarBorder';
-import StarIcon from '@material-ui/icons/Star';
 
 import { useStyles } from './styles';
 import usersApi from '../../api/users';
@@ -36,6 +21,7 @@ import DialogForm from '../../layouts/main/components/dialog-form';
 import UserForm from './components/user-form';
 import DialogActions from '../../layouts/main/components/dialog-actions';
 import UserPasswordForm from './components/user-password-form';
+import UsersTable from './components/users-table';
 
 function UsersPage() {
   const classes = useStyles();
@@ -45,16 +31,21 @@ function UsersPage() {
   const [isPasswordFormOpen, setIsPasswordFormOpen] = useState(false);
   const [userData, setUserData] = useState<IUser | null>(null);
   const [mode, setMode] = useState<'create' | 'edit'>('create');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  async function fetchUsers() {
-    const response = await usersApi.getAll();
+  function handleSearchTerm(e: any) {
+    setSearchTerm(e.target.value);
+  }
+
+  const fetchUsers = useCallback(async () => {
+    const response = await usersApi.getAll(searchTerm);
 
     if (response.status !== 'success') {
       return;
     }
 
     setUsers(response.data.users);
-  }
+  }, [setUsers, searchTerm]);
 
   function updateRole(user: IUser) {
     return () => {
@@ -142,7 +133,7 @@ function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers, searchTerm]);
 
   return (
     <>
@@ -173,6 +164,8 @@ function UsersPage() {
                 <SearchIcon />
               </InputAdornment>
             }
+            value={searchTerm}
+            onChange={handleSearchTerm}
           />
         </FormControl>
         <Hidden smDown>
@@ -186,78 +179,13 @@ function UsersPage() {
           </Button>
         </Hidden>
       </Grid>
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="user table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">Name</TableCell>
-              <TableCell align="left">Username</TableCell>
-              <TableCell align="left">Role</TableCell>
-              <TableCell align="left">Last modified</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((user: IUser) => (
-              <TableRow key={user._id}>
-                <TableCell component="th" scope="row">
-                  {user.name}
-                </TableCell>
-                <TableCell align="left">{user.username}</TableCell>
-                <TableCell align="left">{user.role}</TableCell>
-                <TableCell align="left">
-                  {formatDistanceToNow(parseISO(user.updatedAt), {
-                    addSuffix: true,
-                    includeSeconds: true,
-                  })}
-                </TableCell>
-                <TableCell>
-                  <Tooltip
-                    title={`${
-                      user.role === 'basic' ? 'Promote' : 'Demote'
-                    } user`}
-                  >
-                    <IconButton
-                      aria-label="promote or demote user"
-                      onClick={updateRole(user)}
-                    >
-                      {user.role === 'basic' ? (
-                        <StarIcon />
-                      ) : (
-                        <StarBorderIcon />
-                      )}
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Edit password">
-                    <IconButton
-                      aria-label="edit user password"
-                      onClick={openPasswordForm(user)}
-                    >
-                      <KeyIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Edit user">
-                    <IconButton
-                      aria-label="edit user"
-                      onClick={openDialog('edit', user)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete user">
-                    <IconButton
-                      aria-label="delete user"
-                      onClick={handleDelete(user)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <UsersTable
+        users={users}
+        handleDelete={handleDelete}
+        openDialog={openDialog}
+        openPasswordForm={openPasswordForm}
+        updateRole={updateRole}
+      />
       <Hidden mdUp>
         <Fab
           color="secondary"
