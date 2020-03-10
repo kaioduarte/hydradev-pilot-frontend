@@ -9,8 +9,8 @@ export default {
   create(input: ICreateUserDto) {
     return jsonResponse(api.url('/users').post(input));
   },
-  getAll() {
-    return jsonResponse(api.url('/users').get());
+  getAll(name = '') {
+    return jsonResponse(api.url(`/users?name=${name}`).get());
   },
   patch(_id: string, input: Partial<ICreateUserDto>) {
     return jsonResponse(api.url(`/users/${_id}`).patch(input));
