@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
 import FormControl from '@material-ui/core/FormControl';
@@ -24,9 +24,20 @@ const defaultValues = {
 };
 
 function UserForm({ children, data, submitForm, mode }: Props) {
-  const { control, handleSubmit } = useForm({
-    defaultValues: data || defaultValues,
+  const { control, handleSubmit, register, setValue } = useForm({
+    defaultValues: defaultValues || data,
   });
+  const [role, setRole] = useState('basic');
+
+  function handleRoleChange(e: any) {
+    const { value } = e.target;
+    setValue('role', value);
+    setRole(value);
+  }
+
+  useEffect(() => {
+    register({ name: 'role' });
+  }, [register]);
 
   return (
     <form noValidate onSubmit={handleSubmit(submitForm)}>
@@ -73,23 +84,19 @@ function UserForm({ children, data, submitForm, mode }: Props) {
           </Grid>
         )}
         <Grid item xs={12}>
-          <Controller
-            as={
-              <FormControl fullWidth required>
-                <InputLabel id="role-label">Role</InputLabel>
-                <Select
-                  labelId="role-label"
-                  margin="dense"
-                  defaultValue={data?.role || 'basic'}
-                >
-                  <MenuItem value="basic">Basic</MenuItem>
-                  <MenuItem value="admin">Admin</MenuItem>
-                </Select>
-              </FormControl>
-            }
-            name="role"
-            control={control}
-          />
+          <FormControl fullWidth required>
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select
+              name="role"
+              labelId="role-label"
+              margin="dense"
+              value={role}
+              onChange={handleRoleChange}
+            >
+              <MenuItem value="basic">Basic</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
       </Grid>
       {children}
