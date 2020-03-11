@@ -7,18 +7,21 @@ import { GlobalStyle } from './styles/global';
 import { theme } from './styles/theme';
 import App from './app';
 import history from './utils/history';
+import SnackbarProvider from './contexts/snackbar';
 
 function Root() {
   return (
     <MuiThemeProvider theme={theme}>
-      <ConfirmProvider>
-        <CssBaseline />
-        <GlobalStyle />
+      <SnackbarProvider>
+        <ConfirmProvider>
+          <CssBaseline />
+          <GlobalStyle />
 
-        <Router history={history}>
-          <Route component={App} />
-        </Router>
-      </ConfirmProvider>
+          <Router history={history}>
+            <Route component={App} />
+          </Router>
+        </ConfirmProvider>
+      </SnackbarProvider>
     </MuiThemeProvider>
   );
 }
