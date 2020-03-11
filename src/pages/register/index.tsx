@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link as RouterLink, useHistory } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, FieldError } from 'react-hook-form';
+import * as Yup from 'yup';
 
 // MUI components
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
@@ -15,24 +17,44 @@ import authApi from '../../api/auth';
 import { saveToken } from '../../utils/auth';
 import { useStyles } from './styles';
 import { ReactComponent as Logo } from '../../assets/images/cards.svg';
+import { FetchContext } from '../../contexts/fetch';
 
 function RegisterPage() {
   const classes = useStyles();
   const history = useHistory();
-  const { control, handleSubmit } = useForm();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { interceptRequest } = useContext(FetchContext);
+  const { control, handleSubmit, errors } = useForm({
+    mode: 'onBlur',
+    validationSchema: Yup.object().shape({
+      name: Yup.string()
+        .trim()
+        .min(3, 'Name should have at least 3 characters')
+        .max(255, 'Name should have at most 255 characters')
+        .required(),
+      username: Yup.string()
+        .trim()
+        .min(3, 'Username should have at least 3 characters')
+        .max(64, 'Username should have at most 64 characters')
+        .required(),
+      password: Yup.string()
+        .trim()
+        .min(6, 'Password must be at least 6 characters')
+        .max(32, 'password must be at most 32 characters')
+        .required(),
+    }),
+  });
+  const [isSubmiting, setIsSubmiting] = useState(false);
 
   async function submitForm(data: any, e: any) {
     e.preventDefault();
-    const response = await authApi.signUp(data);
+    setIsSubmiting(true);
+    const response = await interceptRequest(authApi.signUp(data));
+    setIsSubmiting(false);
 
-    if (response.status !== 'success') {
-      setErrorMessage(response.data.message);
-      return;
+    if (response) {
+      saveToken(response.data.token);
+      history.replace('/');
     }
-
-    saveToken(response.data.token);
-    history.replace('/');
   }
 
   return (
@@ -59,10 +81,13 @@ function RegisterPage() {
                 fullWidth
                 label="Name"
                 autoComplete="name"
+                error={!!errors.name}
+                helperText={(errors?.name as FieldError)?.message}
               />
             }
             name="name"
             control={control}
+            defaultValue=""
           />
           <Controller
             as={
@@ -73,10 +98,13 @@ function RegisterPage() {
                 fullWidth
                 label="Username"
                 autoComplete="username"
+                error={!!errors.username}
+                helperText={(errors?.username as FieldError)?.message}
               />
             }
             name="username"
             control={control}
+            defaultValue=""
           />
           <Controller
             as={
@@ -88,22 +116,23 @@ function RegisterPage() {
                 label="Password"
                 type="password"
                 autoComplete="current-password"
+                error={!!errors.password}
+                helperText={(errors?.password as FieldError)?.message}
               />
             }
             name="password"
             control={control}
+            defaultValue=""
           />
-          <Typography align="center" component="small" color="error">
-            {errorMessage}
-          </Typography>
           <Button
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
+            disabled={!!Object.keys(errors).length || isSubmiting}
           >
-            Register
+            Register {isSubmiting && <CircularProgress size="1rem" />}
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
