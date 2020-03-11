@@ -1,24 +1,29 @@
-import { api, jsonResponse, rawResponse } from './index';
+import { api } from './index';
 import { ICreateUserDto } from '../interfaces/dto/create-user.dto';
 import { getUserInfoFromToken } from '../utils/auth';
 
+const users = api.url('/users');
+
 export default {
   me() {
-    return jsonResponse(api.url(`/users/${getUserInfoFromToken()?._id}`).get());
+    return users
+      .url(`/${getUserInfoFromToken()?._id}`)
+      .get()
+      .json();
   },
   create(input: ICreateUserDto) {
-    return jsonResponse(api.url('/users').post(input));
+    return users.post(input).json();
   },
   getAll(name = '') {
-    return jsonResponse(api.url(`/users?name=${name}`).get());
+    return users.query({ name }).get();
   },
   patch(_id: string, input: Partial<ICreateUserDto>) {
-    return jsonResponse(api.url(`/users/${_id}`).patch(input));
+    return users.url(`/${_id}`).patch(input);
   },
   update(_id: string, input: Partial<ICreateUserDto>) {
-    return jsonResponse(api.url(`/users/${_id}`).put(input));
+    return users.url(`/${_id}`).put(input);
   },
   delete(_id: string) {
-    return rawResponse(api.url(`/users/${_id}`).delete());
+    return users.url(`/${_id}`).delete();
   },
 };
